@@ -1,0 +1,54 @@
+#Versione di docker-compose usata
+version: '3.9'
+
+#Docker compose mette a disposizione secrets per salvare delle password
+secrets: 
+  root_db_password: 
+    file: root_db_password.txt
+
+#Corrisponde all'istruzione "docker network create _nomerete_"
+networks:
+  ws-sql-net:
+    driver: bridge #bridge funziona su singolo host
+
+#Corrisponde a "docker run", su docker compose i containeri sono chiamati servizi
+services:
+  #Nome del container assegnato  da docker-compose 
+  #(NON è il nome specificato con --name)
+  serv-sql-server:
+    #nome dell'immagine di partenza
+    image: mysql:latest
+    #--name
+    container_name: sqlserver
+    #-e
+    environment:
+    #siccome abbiamo messe la variabile in un file dobbiamo specificare _FILE e mettere il percorso del file
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/root_db_password
+      MYSQL_DATABASE: gestione_ticket
+    #Quando dichiaro degli array uso "-"
+    #--network 
+    networks:
+      - ws-sql-net
+    #-p
+    ports:
+      - 3350:3306
+    volumes:
+      - ./db-server:/docker-entrypoint-initdb.d
+    secrets:
+      - root_db_password
+
+  serv-ws-server: 
+    container_name: ws-server
+    image: node:latest
+    #-w
+    working_dir: /app 
+    networks:
+      - ws-sql-net
+    ports: 
+      - 3000:3000
+    #comando per avere un terminale interattivo
+    tty: true
+    volumes:
+     - ./ws-server:/app
+    secrets:
+     - root_db_password
