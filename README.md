@@ -141,3 +141,24 @@ Per evitare di dover ogni volta ricreare i container e le network andiamo a crea
 docker-compose up
 ``` 
 per creare e attivare i container e le network
+
+## CONNESSIONE AL SERVER MYSQL
+Essendo una connessione che richiede dati, è più sicuro aprire la connesione all'inizio di ogni metodo e chiuderla alla fine di ogni metodo
+
+## URL
+Raccomandazione: 
+se io prevedo nel codice un percorso
+.../users/:id
+poi non posso aggiungere un 
+.../users/:nome
+perché il server non vede la differenza tra le due variabili
+Quindi, quando si sceglie un percorso, bisogna ragionarle in modo che non ci siano ambiguità
+
+## FILE :HTTP
+Installando l'estensione REST Client possiamo creare un file con estensione .http in cui possiamo provare i nostri metodi vedendo cosa restituiscono i vari indirizzi
+```
+GET http://localhost:3000/Users
+```
+```
+DELETE http://localhost:3000/Users/1
+```
