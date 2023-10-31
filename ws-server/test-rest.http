@@ -1,0 +1,18 @@
+GET http://localhost:3000/Users
+###
+
+DELETE http://localhost:3000/Users/1
+###
+
+POST http://localhost:3000/Users HTTP/1.1
+content-type: application/json
+
+{
+    "nome": "gbseg4aswef",
+    "cognome": "Tentini",
+    "data_nascita": "2023-04-08",
+    "email": "andrea.trentini@marconirovereto.it",
+    "username": "andtrentini",
+    "password": "pippo"
+}
+###
