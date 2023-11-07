@@ -2,85 +2,51 @@ const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const bcrypt = require('bcrypt');
+const usersRouter = require('./users.js')
+const fs = require('fs');
+
+const config = require('./config.js');
 
 const service = express();
-
 service.use(cors());
 service.use(bodyParser.json());
 service.use(bodyParser.urlencoded({ extended: false }));
 
-const parametriConnessioneDB = {
-    host: 'sqlserver',
-    user: 'root',
-    password: 'root',
-    database: 'gestione_ticket'
-};
+const parametriConnessioneDB = config.dbParams;
 
-service.get('/', (request, response) => {
+service.get('/', (req, res) => {
     response.sendFile(__dirname + '/help.html');
 });
 
-service.get('/users', (req, res) => {
-    const connessione = mysql.createConnection(parametriConnessioneDB);
-    let queryString = 'SELECT * FROM Users';
-    connessione.query(queryString, (error, dati) => {
-        if (!error) {
-            res.json(dati);
+server.prependOnceListener('/init', (req, res) => {
+    let secret = req.body.secret;
+    if(secret === config.secret){
+        //1. Carico il file con lo script
+        const scriptSQL = fs.readFileSync(__dirname + '/script.sql').toString();
+       connesione = mysql.createConnection(parametriConnessioneDB);
+       // 2. Eseguo lo script SQL
+       connesione.query(scriptSQL, (error, dati) =>{
+        if(!error){
+            connesione = mysql.createConnection(parametriConnessioneDB);
+            let querySTR = 'INSERT INTO Users (username, password) VALUES (?, ?)'
+            let password = bcrypt.hashSync(config.secret, config.saltRounds);
+            let nuovoUtente = ['admin', password]
+            parametriConnessioneDB.query(querySTR, nuovoUtente, (error, dati) => {
+
+            })
+            res.send('Database inizializzato correttamente');
         } else {
+            //visualizzo in console l'errore
+            
             res.status(500).send(error);
         }
-    })
-    connessione.end(() => { });
-});
-
-service.get('/users/:id', (req, res) => {
-    const connessione = mysql.createConnection(parametriConnessioneDB);
-    let id = req.params.id;
-    if (id) {
-        let queryString = 'SELECT * FROM Users WHERE id = ?';
-        connessione.query(queryString, id, (error, dati) => {
-            if (!error) {
-                res.json(dati);
-            } else {
-                res.status(500).send(error);
-            }
-        })
-        connessione.end(() => { });
+       });
     }
-});
+})
 
-service.delete('/users/:id', (req, res) => {
-    const connessione = mysql.createConnection(parametriConnessioneDB);
-    let id = req.params.id;
-    if (id) {
-        let queryString = 'DELETE FROM Users WHERE id = ?';
-        connessione.query(queryString, id, (error, dati) => {
-            if (!error) {
-                res.json(dati);
-            } else {
-                res.status(500).send(error);
-            }
-        })
-        connessione.end(() => { });
-    }
-});
+service.use(config.baseUrls.users, usersRouter);
 
-service.post('/users', (req, res) => {
-    let nuovoUtente = [req.body.nome, req.body.cognome, req.body.data_nascita,
-    req.body.email, req.body.username, req.body.password];
-    console.log(nuovoUtente);
-    const connessione = mysql.createConnection(parametriConnessioneDB);
-    let queryString = 'INSERT INTO Users (nome, cognome, data_nascita, email, username, password) VALUES (?, ?, ?, ?, ?, ?)';
-    connessione.query(queryString, nuovoUtente, (error, dati) => {
-        if (!error) {
-            res.json(dati);
-        } else {
-            res.status(500).send(error);
-        }
-    })
-    connessione.end(() => { });
-});
-
-const server = service.listen(3000, () => {
+const server = service.listen(config.serverPort, () => {
     console.log('Server in esecuzione...');
 });

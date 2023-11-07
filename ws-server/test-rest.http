@@ -1,15 +1,46 @@
 GET http://localhost:3000/Users
 ###
 
+GET http://localhost:3000/Users/3
+###
+
 DELETE http://localhost:3000/Users/1
 ###
 
-POST http://localhost:3000/Users HTTP/1.1
+POST http://localhost:3000/users HTTP/1.1
 content-type: application/json
 
 {
     "nome": "gbseg4aswef",
     "cognome": "Tentini",
+    "data_nascita": "2023-04-08",
+    "email": "andrea.trentini@marconirovereto.it",
+    "username": "andtrentini",
+    "password": "pippo"
+}
+###
+###
+
+POST http://localhost:3000/users HTTP/1.1
+content-type: application/json
+
+{
+    "nome": "Andrea",
+    "cognome": "Tentini",
+    "data_nascita": "2023-04-08",
+    "email": "andrea.trentini@marconirovereto.it",
+    "username": "andtrentini",
+    "password": "pippo"
+}
+###
+
+PUT http://localhost:3000/users/2 HTTP/1.1
+
+content-type: application/json
+
+{
+    "nome": "Luca",
+    "cognome": "Boschi",
     "data_nascita": "2023-04-08",
     "email": "andrea.trentini@marconirovereto.it",
     "username": "andtrentini",
