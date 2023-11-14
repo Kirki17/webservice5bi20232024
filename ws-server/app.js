@@ -19,7 +19,7 @@ service.get('/', (req, res) => {
     response.sendFile(__dirname + '/help.html');
 });
 
-server.prependOnceListener('/init', (req, res) => {
+server.post('/init', (req, res) => {
     let secret = req.body.secret;
     if(secret === config.secret){
         //1. Carico il file con lo script
@@ -42,6 +42,37 @@ server.prependOnceListener('/init', (req, res) => {
             res.status(500).send(error);
         }
        });
+    }
+})
+
+service.post('/login', (req, res) => {
+    let username = req.body.username;
+    let password = req.body.password;
+    if(username && password) {
+        const connessione = mysql.createConnection(parametriConnessioneDB);
+        let querySTR = 'SELECT * FROM Users WHERE username = ?';
+        connessione.query(querySTR, username, (error, dati) => {
+            if(!error){
+                if(dati.length > 0){
+                    let user = dati [0];
+                    let passwordHash = user.password;
+                    if(bcrypt.compareSync(password, passwordHash)){
+                        //creare un token bearer ed inviarlo al client
+                        //il token deve contenere:
+                        // - username
+                        // - data di creazione
+                        // - data di scadenza (24 ore)
+                        // - ruolo (admin, user)
+                        res.send('OK');
+                    } else {
+                        res.status(401).send('Unauthorized');
+                    }
+                }
+                else {
+
+                }
+            }
+        })
     }
 })
 
