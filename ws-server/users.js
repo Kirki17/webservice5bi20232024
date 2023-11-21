@@ -3,12 +3,15 @@ const mysql = require('mysql2');
 const bcrypt = require('bcrypt');
 
 const config = require('./config.js');
+const auth = require('./auth.js');
 
 const router = express.Router();
 
 const parametriConnessioneDB = config.dbParams;
 
-router.get('', (req, res) => {
+router.use(auth);
+
+router.get('/', (req, res) => {
     const connessione = mysql.createConnection(parametriConnessioneDB);
     let queryString = 'SELECT * FROM Users';
     connessione.query(queryString, (error, dati) => {

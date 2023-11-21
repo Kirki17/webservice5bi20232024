@@ -16,6 +16,10 @@ service.use(bodyParser.urlencoded({ extended: false }));
 
 const parametriConnessioneDB = config.dbParams;
 
+config.secret = fs.readFileSync('/run/secrets/init_secret', 'utf8');
+config.dbParams.secret = fs.readFileSync('/run/secrets/root_db_password', 'utf8');
+config.dbParamsInit.password = config.dbParams.password;
+
 service.get('/', (req, res) => {
     res.sendFile(__dirname + '/help.html');
 });
@@ -25,18 +29,20 @@ service.post('/init', (req, res) => {
     if (secret === config.secret) {
         //1. Carico il file con lo script
         const scriptSQL = fs.readFileSync(__dirname + '/script.sql','utf8');
-        console.log(__dirname+'/script.sql');
-        connesione = mysql.createConnection(parametriConnessioneDB);
+        connesione = mysql.createConnection(config.dbParamsInit);
         // 2. Eseguo lo script SQL
         connesione.query(scriptSQL, (error, dati) => {
+            connessione.end(() => { });
             if (!error) {
-                connessione = mysql.createConnection(parametriConnessioneDB);
-                let querySTR = 'INSERT INTO Users (username, password) VALUES (?, ?)'
+                connessione = mysql.createConnection(config.dbParamsInit);
+                let querySTR = 'INSERT INTO Users (username, password) VALUES (?, ?)';
+                let adminPassword = fs.readFileSync('/run/secrets/admin_ws_password', 'utf8');
                 let password = bcrypt.hashSync(config.secret, config.saltRounds);
                 let nuovoUtente = ['admin', password]
                 connessione.query(querySTR, nuovoUtente, (error, dati) => {
                     if(!error){
-                        res.send('Database inizializzato correttamente');
+                        connessione.end(() => { });
+                        res.status(200).send('Database inizializzato correttamente');
                     } else {
                         res.status(500).send(error);
                     }

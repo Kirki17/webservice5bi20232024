@@ -5,6 +5,10 @@ version: '3.9'
 secrets: 
   root_db_password: 
     file: root_db_password.txt
+  admin_ws_password:
+    file: admin_ws_password.txt
+  init_secret:
+    file: init_secret.txt
 
 #Corrisponde all'istruzione "docker network create _nomerete_"
 networks:
@@ -19,7 +23,7 @@ services:
     #nome dell'immagine di partenza
     image: mysql:latest
     #--name
-    container_name: sqlserver
+    container_name: db-server
     #-e
     environment:
     #siccome abbiamo messe la variabile in un file dobbiamo specificare _FILE e mettere il percorso del file
@@ -32,8 +36,6 @@ services:
     #-p
     ports:
       - 3350:3306
-    volumes:
-      - ./db-server:/docker-entrypoint-initdb.d
     secrets:
       - root_db_password
 
@@ -52,3 +54,5 @@ services:
      - ./ws-server:/app
     secrets:
      - root_db_password
+     - admin_ws_password
+     - init_secret
